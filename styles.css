@@ -1,0 +1,506 @@
+/*
+ * Year Map: a year on one page, after Nick Milo's Linear Calendar (CC BY 4.0) — paper, a white grid of twelve rounded
+ * rows, the weekends shaded down the year, serif titles and monospaced numbers. The light theme keeps the template's
+ * beige paper; the dark theme takes the theme's own surfaces.
+ */
+.ym {
+	--ym-paper: #f4f1ea;
+	--ym-cell: #ffffff;
+	--ym-line: #cfc9bd;
+	--ym-line-soft: #e4dfd5;
+	--ym-weekend: #ebe8e2;
+	--ym-ink: #1f1d1a;
+	--ym-ink-soft: #6f6a62;
+	--ym-accent: #e8590c;
+	--ym-accent-soft: rgba(232, 89, 12, 0.16);
+	--ym-danger: #e03131;
+	--ym-note: #e8590c;
+	/* lengths shared by rows of different font sizes are in pixels, so the columns line up */
+	--ym-label-w: 52px;
+	--ym-lane-h: 18px;
+	--ym-serif: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+	--ym-mono: var(--font-monospace, 'Cascadia Mono', Consolas, monospace);
+
+	background: var(--ym-paper);
+	color: var(--ym-ink);
+	border-radius: 12px;
+	padding: 1.4em 1.2em 0.9em;
+	font-size: 15px;
+	overflow-x: auto;
+	user-select: none;
+}
+
+.theme-dark .ym {
+	--ym-paper: var(--background-secondary);
+	--ym-cell: var(--background-primary);
+	--ym-line: var(--background-modifier-border);
+	--ym-line-soft: var(--background-modifier-border);
+	--ym-weekend: var(--background-secondary-alt);
+	--ym-ink: var(--text-normal);
+	--ym-ink-soft: var(--text-muted);
+	--ym-accent-soft: rgba(232, 89, 12, 0.24);
+}
+
+.ym-compact {
+	font-size: 12px;
+	--ym-label-w: 40px;
+	--ym-lane-h: 14px;
+}
+
+.year-map-view {
+	padding: 1.2em;
+}
+
+/* the head: the title in its box, the year's buttons, and the line on the right */
+.ym-head {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.8em 1.2em;
+	margin: 0 var(--ym-label-w) 1.4em;
+	min-width: 760px;
+}
+
+.ym-title-box {
+	background: var(--ym-cell);
+	border: 1px solid var(--ym-line);
+	border-radius: 8px;
+	box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
+	padding: 0.25em 1.4em;
+}
+
+.ym-title {
+	font-family: var(--ym-serif);
+	font-weight: 800;
+	font-size: 1.75em;
+	letter-spacing: -0.01em;
+	margin: 0;
+	cursor: pointer;
+	color: var(--ym-ink);
+}
+
+.ym-title:hover {
+	color: var(--ym-accent);
+}
+
+.ym-nav {
+	display: flex;
+	gap: 0.3em;
+}
+
+.ym-nav button {
+	font-family: var(--ym-mono);
+	font-size: 0.8em;
+	padding: 0.2em 0.7em;
+	height: auto;
+	border-radius: 999px;
+	background: var(--ym-cell);
+	border: 1px solid var(--ym-line);
+	box-shadow: none;
+	color: var(--ym-ink);
+	cursor: pointer;
+	transition: background-color 120ms ease, color 120ms ease;
+}
+
+.ym-nav button:hover {
+	background: var(--ym-accent);
+	border-color: var(--ym-accent);
+	color: #fff;
+}
+
+.ym-tagline {
+	margin-left: auto;
+	font-family: var(--ym-serif);
+	font-size: 1.15em;
+	color: var(--ym-ink);
+}
+
+/* the grid: weekdays above and below, twelve months between, each named on both sides */
+.ym-grid {
+	min-width: 860px;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.ym-weekdays {
+	display: grid;
+	grid-template-columns: var(--ym-label-w) repeat(37, minmax(0, 1fr)) var(--ym-label-w);
+	font-family: var(--ym-mono);
+	font-size: 0.72em;
+	color: var(--ym-ink-soft);
+	text-align: center;
+	padding: 0.3em 0;
+}
+
+.ym-month {
+	display: grid;
+	grid-template-columns: var(--ym-label-w) minmax(0, 1fr) var(--ym-label-w);
+	align-items: stretch;
+}
+
+.ym-mlabel {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: var(--ym-serif);
+	font-weight: 800;
+	font-size: 1.05em;
+	cursor: pointer;
+	transition: color 120ms ease;
+}
+
+.ym-mlabel:hover {
+	color: var(--ym-accent);
+}
+
+.ym-days {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(37, minmax(0, 1fr));
+	grid-template-rows: 1.5em repeat(var(--ym-lanes, 1), var(--ym-lane-h)) minmax(1.9em, auto);
+	background: var(--ym-cell);
+	border: 1px solid var(--ym-line);
+	border-radius: 7px;
+	overflow: hidden;
+}
+
+.ym-cell {
+	grid-column: var(--ym-col);
+	grid-row: 1 / -1;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	border-left: 1px solid var(--ym-line-soft);
+	transition: background-color 120ms ease;
+}
+
+.ym-cell:first-child {
+	border-left: none;
+}
+
+.ym-cell.is-weekend {
+	background: var(--ym-weekend);
+}
+
+.ym-cell[data-iso] {
+	cursor: pointer;
+}
+
+.ym-cell[data-iso]:hover {
+	background: var(--ym-accent-soft);
+}
+
+.ym-cell.is-selecting {
+	background: var(--ym-accent-soft);
+	box-shadow: inset 0 0 0 1px var(--ym-accent);
+}
+
+.ym-cell.is-drop {
+	box-shadow: inset 0 0 0 2px var(--ym-accent);
+}
+
+.ym-num {
+	font-family: var(--ym-mono);
+	font-size: 0.62em;
+	line-height: 1;
+	color: var(--ym-ink-soft);
+	text-align: center;
+	margin: 0.55em auto 0;
+	padding: 0.15em 0.25em;
+	border-radius: 999px;
+}
+
+.ym-cell.is-today .ym-num {
+	background: var(--ym-accent);
+	color: #fff;
+	font-weight: 700;
+}
+
+.ym-cell.is-today {
+	box-shadow: inset 0 0 0 2px var(--ym-accent);
+}
+
+/* a day with a note: a dot in its corner */
+.ym-cell.has-note::after {
+	content: '';
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: var(--ym-note);
+}
+
+.ym-hidden {
+	position: absolute;
+	right: 2px;
+	bottom: 1px;
+	font-family: var(--ym-mono);
+	font-size: 0.5em;
+	color: var(--ym-ink-soft);
+}
+
+/* tasks: a chip per task at the foot of its day */
+.ym-chips {
+	margin-top: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	padding: 0 2px 3px;
+	min-width: 0;
+}
+
+.ym-task {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	min-width: 0;
+	font-size: 0.55em;
+	line-height: 1.35;
+	padding: 0 2px;
+	border-radius: 3px;
+	border-left: 2px solid var(--ym-color);
+	background: color-mix(in srgb, var(--ym-color) 16%, transparent);
+	color: var(--ym-ink);
+	cursor: grab;
+	transition: transform 120ms ease, background-color 120ms ease;
+}
+
+.ym-task:hover {
+	background: color-mix(in srgb, var(--ym-color) 30%, transparent);
+	transform: translateY(-1px);
+}
+
+.ym-task-dot {
+	display: none;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--ym-color);
+	flex: none;
+}
+
+.ym-task-title {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.ym-task.is-done {
+	opacity: 0.55;
+}
+
+.ym-task.is-done .ym-task-title {
+	text-decoration: line-through;
+}
+
+.ym-task.is-overdue {
+	border-left-color: var(--ym-danger);
+	background: color-mix(in srgb, var(--ym-danger) 14%, transparent);
+}
+
+.ym-more {
+	font-family: var(--ym-mono);
+	font-size: 0.5em;
+	color: var(--ym-ink-soft);
+	text-align: center;
+}
+
+/* compact: tasks as dots */
+.ym-compact .ym-chips {
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.ym-compact .ym-task {
+	border-left: none;
+	background: none;
+	padding: 0;
+}
+
+.ym-compact .ym-task-dot {
+	display: block;
+}
+
+.ym-compact .ym-task-title {
+	display: none;
+}
+
+/* events: a bar across their days, over the cells */
+.ym-bar {
+	grid-column: var(--ym-cols);
+	grid-row: var(--ym-row);
+	z-index: 1;
+	margin: 1px 2px;
+	padding: 0 0.45em;
+	border-radius: 4px;
+	background: var(--ym-color);
+	color: #fff;
+	font-size: 0.6em;
+	font-weight: 600;
+	line-height: calc(var(--ym-lane-h) - 2px);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+	transition: filter 120ms ease;
+}
+
+.ym-bar:hover {
+	filter: brightness(1.08) saturate(1.1);
+}
+
+.ym-bar.cont-left {
+	margin-left: 0;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.ym-bar.cont-right {
+	margin-right: 0;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+/* a single day with an icon: the icon, centred in its cell */
+.ym-bar.is-day {
+	padding: 0;
+	text-align: center;
+	text-overflow: clip;
+	font-size: 0.68em;
+}
+
+/* a date inside an event, a deadline: a notch on its left */
+.ym-bar.is-mark {
+	box-shadow: inset 3px 0 0 rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* the legend: the kinds of event the year shows, under the title */
+.ym-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.45em 0.6em;
+	margin: -0.5em var(--ym-label-w) 1.1em;
+	min-width: 760px;
+}
+
+.ym-legend-item {
+	font-size: 0.72em;
+	font-weight: 600;
+	line-height: 1.6;
+	padding: 0 0.8em;
+	border-radius: 999px;
+	border: 1px solid var(--ym-color);
+	background: color-mix(in srgb, var(--ym-color) 16%, var(--ym-cell));
+	color: var(--ym-ink);
+}
+
+/* the quarters, each on its own tint as in the template, the weekend a shade darker */
+.ym-month.has-tint .ym-days {
+	background: var(--ym-qtint);
+}
+
+.ym-month.has-tint .ym-cell.is-weekend {
+	background: color-mix(in srgb, var(--ym-qtint), #000 6%);
+}
+
+/* in a dark theme the pastels would all read as one grey: keep each tint's hue, at a dark lightness and a little more
+   colour (the first line is for an engine without relative colours) */
+.theme-dark .ym-month.has-tint .ym-days {
+	background: color-mix(in srgb, var(--ym-qtint) 10%, var(--ym-cell));
+	background: oklch(from var(--ym-qtint) 0.29 0.03 h);
+}
+
+.theme-dark .ym-month.has-tint .ym-cell.is-weekend {
+	background: color-mix(in srgb, var(--ym-qtint) 10%, var(--ym-weekend));
+	background: oklch(from var(--ym-qtint) 0.25 0.03 h);
+}
+
+.ym-month.has-tint .ym-cell[data-iso]:hover,
+.ym-month.has-tint .ym-cell.is-selecting {
+	background: var(--ym-accent-soft);
+}
+
+.ym-credit {
+	min-width: 760px;
+	margin: 1em var(--ym-label-w) 0;
+	text-align: right;
+	font-family: var(--ym-mono);
+	font-size: 0.55em;
+	color: var(--ym-ink-soft);
+}
+
+/* the planning window */
+.ym-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.ym-swatch {
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border-radius: 50%;
+	background: var(--ym-color);
+	border: 2px solid transparent;
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.ym-swatch.is-selected {
+	border-color: var(--text-normal);
+	box-shadow: inset 0 0 0 2px var(--background-primary);
+}
+
+/* the icons offered in the event window */
+.ym-icons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 6px;
+	max-width: 260px;
+}
+
+.ym-icon-pick {
+	height: auto;
+	padding: 2px 5px;
+	font-size: 1.05em;
+	line-height: 1.2;
+	background: transparent;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.ym-icon-pick:hover {
+	background: var(--background-modifier-hover);
+}
+
+@media print {
+	.ym {
+		--ym-paper: #ffffff;
+		overflow: visible;
+	}
+
+	.ym-nav {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ym *,
+	.ym-swatch {
+		transition: none;
+	}
+
+	.ym-task:hover {
+		transform: none;
+	}
+}

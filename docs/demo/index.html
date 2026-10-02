@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Year Map, a demo</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+	:root {
+		--background-primary: #ffffff;
+		--background-secondary: #f6f6f6;
+		--background-secondary-alt: #ececec;
+		--background-modifier-border: #e0e0e0;
+		--text-normal: #222222;
+		--text-muted: #5c5c5c;
+		--font-monospace: "Cascadia Mono", Consolas, monospace;
+	}
+	:root[data-theme="dark"] {
+		--background-primary: #1e1e1e;
+		--background-secondary: #262626;
+		--background-secondary-alt: #2e2e2e;
+		--background-modifier-border: #3a3a3a;
+		--text-normal: #dadada;
+		--text-muted: #a8a8a8;
+	}
+	body {
+		margin: 0;
+		padding: 20px;
+		background: var(--background-primary);
+		color: var(--text-normal);
+		font-family: "Segoe UI", Inter, ui-sans-serif, system-ui, sans-serif;
+	}
+	button { font: inherit; }
+</style>
+<script>
+	const theme = new URLSearchParams(location.search).get('theme') || 'light';
+	document.documentElement.dataset.theme = theme;
+</script>
+</head>
+<body>
+	<script>document.body.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');</script>
+	<div id="year"></div>
+	<script src="demo.js"></script>
+</body>
+</html>

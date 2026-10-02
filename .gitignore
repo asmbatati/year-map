@@ -1,0 +1,31 @@
+# vscode
+.vscode
+
+# Intellij
+*.iml
+.idea
+
+# npm
+node_modules
+
+# Don't include the compiled main.js file in the repo.
+# It is uploaded to GitHub releases instead.
+main.js
+
+# Exclude sourcemaps
+*.map
+
+# obsidian
+data.json
+
+# the tests' bundle
+test/.build
+
+# Exclude macOS Finder (System Explorer) View States
+.DS_Store
+
+# the demo page's bundle
+docs/demo/demo.js
+
+# a machine's own notes for a session opened here (where its vault is): never published
+CLAUDE.local.md

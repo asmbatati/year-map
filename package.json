@@ -1,0 +1,35 @@
+{
+	"name": "year-map",
+	"version": "1.1.0",
+	"description": "A linear calendar: the whole year on one page, with your daily notes, your tasks and your plans on it.",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "node --test test/grid.test.ts test/layout.test.ts test/options.test.ts test/sources.test.ts test/events.test.ts test/render.test.ts test/render11.test.ts test/plugin.test.ts",
+		"lint": "eslint .",
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
+	},
+	"keywords": [
+		"obsidian-plugin",
+		"calendar",
+		"linear calendar",
+		"year planner",
+		"tasknotes"
+	],
+	"author": "Abdulrahman S. Al-Batati",
+	"license": "MIT",
+	"devDependencies": {
+		"@eslint/js": "^9.39.4",
+		"@types/node": "^22.15.17",
+		"esbuild": "0.25.5",
+		"eslint": "^9.39.4",
+		"eslint-plugin-obsidianmd": "^0.4.0",
+		"globals": "^17.6.0",
+		"jiti": "^2.6.1",
+		"obsidian": "latest",
+		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.59.1"
+	}
+}
