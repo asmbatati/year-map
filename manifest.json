@@ -1,7 +1,7 @@
 {
 	"id": "year-map",
 	"name": "Year Map",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"minAppVersion": "1.13.0",
 	"description": "A linear calendar: the whole year on one page, with your daily notes, your tasks and your plans on it.",
 	"author": "Abdulrahman S. Al-Batati",
