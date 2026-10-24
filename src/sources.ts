@@ -252,6 +252,50 @@ export function eventsFrom(notes: readonly NoteFacts[], es: EventOptions, ctx: E
 	return out;
 }
 
+/** An event note as its window shows it, read from the note itself, not from a year's occurrence of it: the first
+ * start and end it has, its kind (as the settings spell it when it is one), icon, colour and repeat. */
+export interface StoredEvent {
+	title: string;
+	start: string;
+	end: string;
+	category?: string;
+	icon?: string;
+	color?: string;
+	repeat: 'never' | 'yearly' | 'hijri';
+	/** The keys the dates were found under, to write them back where they were. */
+	startKey?: string;
+	endKey?: string;
+}
+
+export function storedEvent(fm: Record<string, unknown> | undefined, name: string, es: EventOptions): StoredEvent {
+	const f = fm ?? {};
+	const found = (keys: string[]): { key: string; iso: string } | null => {
+		for (const k of keys) {
+			const iso = dateOf(f[k]);
+			if (iso) return { key: k, iso };
+		}
+		return null;
+	};
+	const s = found(es.startKeys);
+	const e = found(es.endKeys);
+	const raw = stringOf(f[es.categoryKey]).trim();
+	const kind = es.categories.find((c) => c.name.trim().toLowerCase() === raw.toLowerCase());
+	const color = stringOf(f[es.colorKey]).trim();
+	const out: StoredEvent = {
+		title: stringOf(f[es.titleKey]) || name,
+		start: s?.iso ?? '',
+		end: e?.iso ?? s?.iso ?? '',
+		repeat: isYearly(f[es.repeatKey]) ? (isHijri(f[es.calendarKey]) ? 'hijri' : 'yearly') : 'never',
+	};
+	if (raw) out.category = kind?.name ?? raw;
+	const icon = iconOf(f[es.iconKey]);
+	if (icon) out.icon = icon;
+	if (color && safeColor(color, '') === color) out.color = color;
+	if (s) out.startKey = s.key;
+	if (e) out.endKey = e.key;
+	return out;
+}
+
 /** A date moved to another day: the new day, with the old value's time of day kept when it had one. */
 export function moveDate(old: unknown, iso: string): string {
 	const m = typeof old === 'string' ? /^\d{4}-\d{2}-\d{2}([T ][\d:.]+(?:Z|[+-]\d{2}:?\d{2})?)$/.exec(old.trim()) : null;

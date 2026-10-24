@@ -46,6 +46,8 @@ function calls(): { log: unknown[][]; h: Handlers } {
 			openMonth: rec('openMonth'),
 			openYear: rec('openYear'),
 			openNote: rec('openNote'),
+			clickEvent: rec('clickEvent'),
+			eventMenu: rec('eventMenu'),
 			planRange: rec('planRange'),
 			reschedule: rec('reschedule'),
 			prevYear: rec('prevYear'),
@@ -130,14 +132,16 @@ test('clicks: a day, a month, the title, a task, a bar, and the year buttons', (
 	root.all('ym-title')[0]?.fire('click');
 	root.find('data-iso', '2026-10-05')?.all('ym-task')[0]?.fire('click');
 	root.all('ym-bar')[0]?.fire('click');
+	const right = root.all('ym-bar')[0]?.fire('contextmenu');
+	assert.ok(right?.defaultPrevented && right.propagationStopped, 'a right-click on a bar is for the bar alone');
 	root.all('ym-prev')[0]?.fire('click');
 	root.all('ym-next')[0]?.fire('click');
 	root.all('ym-today')[0]?.fire('click');
 	// the year's title passes its click on, so a modified click can open the year's note in a new tab; a day's click goes
-	// to the plugin, which asks, opens the note or adds an event (1.1)
+	// to the plugin, which asks, opens the note or adds an event (1.1); a bar's too, which opens or edits it (1.2)
 	assert.deepEqual(log.map((x) => [x[0], typeof x[1] === 'object' ? 'event' : x[1]]), [
 		['clickDay', '2026-03-14'], ['openMonth', 0], ['openYear', 'event'], ['openNote', 'T/a.md'],
-		['openNote', 'Year Map/Lisbon.md'], ['prevYear', undefined], ['nextYear', undefined], ['thisYear', undefined],
+		['clickEvent', 'Year Map/Lisbon.md'], ['eventMenu', 'Year Map/Lisbon.md'], ['prevYear', undefined], ['nextYear', undefined], ['thisYear', undefined],
 	]);
 });
 

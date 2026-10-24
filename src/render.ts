@@ -16,6 +16,9 @@ export interface Handlers {
 	openMonth(month: number, evt?: MouseEvent): void;
 	openYear(evt?: MouseEvent): void;
 	openNote(path: string, evt?: MouseEvent): void;
+	/** A click on an event: its note, its edit, or a menu of both, as the settings say. */
+	clickEvent(path: string, evt?: MouseEvent | KeyboardEvent): void;
+	eventMenu(path: string, evt?: MouseEvent): void;
 	planRange(start: string, end: string): void;
 	reschedule(path: string, fromIso: string, kind: 'due' | 'scheduled', toIso: string): void;
 	prevYear(): void;
@@ -233,9 +236,14 @@ export function renderYear(container: HTMLElement, m: YearModel, h: Handlers): v
 			const bar = days.createDiv({ cls, text, attr: { 'data-path': s.item.path, 'aria-label': s.item.title, role: 'button', tabindex: '0',
 				title: `${s.item.title} · ${rangeLabel(s.item.start, s.item.end, m.monthNames)}` } });
 			bar.setCssProps({ '--ym-cols': `${s.startCol + 1} / ${s.endCol + 2}`, '--ym-row': String(s.lane + 2), '--ym-color': s.item.color });
-			bar.addEventListener('click', (evt) => h.openNote(s.item.path, evt));
+			bar.addEventListener('click', (evt) => h.clickEvent(s.item.path, evt));
+			bar.addEventListener('contextmenu', (evt) => {
+				evt.preventDefault();
+				evt.stopPropagation();
+				h.eventMenu(s.item.path, evt);
+			});
 			bar.addEventListener('keydown', (evt) => {
-				if (evt.key === 'Enter') h.openNote(s.item.path);
+				if (evt.key === 'Enter') h.clickEvent(s.item.path);
 			});
 			if (h.hover) {
 				const hover = h.hover;

@@ -31,6 +31,9 @@ The layout follows **The Linear Calendar** by Nick Milo (see [Credit](#credit)).
 - **Quarters.** Each quarter on a tint of its own, lavender, cream, aqua and rose, as the template does it.
 - **Plans.** Drag across days to plan something: name it, choose its kind, icon and repeat, and it is written as an
   event note.
+- **Changes.** Right-click an event (or choose *Edit* in a day's menu) to change its name, kind, icon, days, repeat or
+  colour. Only what you change is written; a note still named after its old title is renamed, its links kept. A
+  setting can make a click on an event edit it, or ask, instead of opening its note.
 
 ![The same year in a dark theme](docs/screenshot-dark.png)
 
@@ -135,6 +138,7 @@ The Hijri dates come from your system's own calendar data (`Intl`, Umm al-Qura).
 | Tasks shown on a day | 3 | More are counted. |
 | Event rows in a month | 3 | Events beyond these are counted on their days. |
 | A click on a day | Shows a menu | Or opens the day's note, or adds an event. A right-click always shows the menu. |
+| A click on an event | Opens its note | Or edits it, or asks which. A right-click always asks. |
 | Legend | on | The kinds of event the year shows, under the title. |
 | Tint each quarter, and the four tints | on; lavender, cream, aqua, rose | As in the Linear Calendar template. |
 | Show daily notes | on | |

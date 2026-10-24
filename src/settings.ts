@@ -127,6 +127,15 @@ export class YearMapSettingTab extends PluginSettingTab {
 							options: { menu: 'Shows a menu: add an event, or open the day\'s note', note: 'Opens the day\'s note', event: 'Adds an event' },
 						},
 					},
+					{
+						name: 'A click on an event',
+						desc: 'A right-click on an event always asks, and a click with Ctrl or Cmd opens its note in a new tab.',
+						control: {
+							type: 'dropdown',
+							key: 'eventClick',
+							options: { note: 'Opens its note', edit: 'Edits it: name, kind, icon, days, repeat, colour', menu: 'Shows a menu: open its note, or edit it' },
+						},
+					},
 					{ name: 'Legend', desc: 'Under the title, the kinds of event the year shows.', control: { type: 'toggle', key: 'legend' } },
 					{ name: 'Tint each quarter', desc: 'Each quarter on a colour of its own, as the Linear Calendar template does it.', control: { type: 'toggle', key: 'quarters.enabled' } },
 					{ name: 'First quarter', visible: () => this.s.quarters.enabled, control: { type: 'color', key: 'quarters.colors.0' } },

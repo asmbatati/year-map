@@ -79,6 +79,7 @@ export interface QuarterOptions {
 }
 
 export type DayClick = 'menu' | 'note' | 'event';
+export type EventClick = 'note' | 'edit' | 'menu';
 
 export interface YearMapSettings {
 	blockName: string;
@@ -91,6 +92,8 @@ export interface YearMapSettings {
 	maxChips: number;
 	/** What a click on a day does: ask (add an event, or open the day's note), open the note, or add an event. */
 	dayClick: DayClick;
+	/** What a click on an event does: open its note, open its window to edit it, or ask which. */
+	eventClick: EventClick;
 	/** A line under the title naming the kinds of event the year shows. */
 	legend: boolean;
 	quarters: QuarterOptions;
@@ -126,6 +129,7 @@ export const DEFAULT_SETTINGS: YearMapSettings = {
 	maxLanes: 3,
 	maxChips: 3,
 	dayClick: 'menu',
+	eventClick: 'note',
 	legend: true,
 	quarters: { enabled: true, colors: [...DEFAULT_QUARTER_COLORS] },
 	days: {

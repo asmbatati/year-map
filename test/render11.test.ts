@@ -30,7 +30,7 @@ function draw(m: YearModel): { root: FakeEl; log: unknown[][] } {
 	const rec = (name: string) => (...a: unknown[]) => { log.push([name, ...a]); };
 	const h: Handlers = {
 		openDay: rec('openDay'), clickDay: rec('clickDay'), dayMenu: rec('dayMenu'), openMonth: rec('openMonth'),
-		openYear: rec('openYear'), openNote: rec('openNote'), planRange: rec('planRange'), reschedule: rec('reschedule'),
+		openYear: rec('openYear'), openNote: rec('openNote'), clickEvent: rec('clickEvent'), eventMenu: rec('eventMenu'), planRange: rec('planRange'), reschedule: rec('reschedule'),
 		prevYear: rec('prevYear'), nextYear: rec('nextYear'), thisYear: rec('thisYear'),
 	};
 	renderYear(root as unknown as HTMLElement, m, h);

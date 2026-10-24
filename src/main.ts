@@ -152,7 +152,25 @@ export default class YearMapPlugin extends Plugin {
 			(draft) => this.integrations.createEvent(draft)).open();
 	}
 
-	/** A day's menu: add an event there, or one every year, open the day's note, or open an event on it. */
+	/** The event window on an event already drawn, filled in from its note; it writes back what was changed. */
+	private editEvent(path: string): void {
+		const event = this.integrations.storedEvent(path);
+		if (!event) return;
+		new EventModal(this.app, { label: event.title, start: event.start, end: event.end, repeat: event.repeat,
+			categories: this.settings.events.categories, event }, (draft) => this.integrations.updateEvent(path, event, draft)).open();
+	}
+
+	/** An event's menu: open its note, or edit it. */
+	private eventMenu(path: string, evt: MouseEvent | undefined, surface: Surface): void {
+		const menu = new Menu();
+		menu.addItem((i) => i.setTitle('Open the note').setIcon('file-text')
+			.onClick(() => void this.app.workspace.openLinkText(path, surface.sourcePath, false)));
+		menu.addItem((i) => i.setTitle('Edit the event').setIcon('pencil').onClick(() => this.editEvent(path)));
+		if (evt) menu.showAtMouseEvent(evt);
+		else menu.showAtPosition({ x: 0, y: 0 });
+	}
+
+	/** A day's menu: add an event there, or one every year, open the day's note, or open or edit an event on it. */
 	private dayMenu(iso: string, evt: MouseEvent | undefined, model: YearModel, surface: Surface): void {
 		const label = rangeLabel(iso, iso, model.monthNames);
 		const menu = new Menu();
@@ -169,6 +187,13 @@ export default class YearMapPlugin extends Plugin {
 		for (const e of on) {
 			menu.addItem((i) => i.setTitle(`Open ${e.icon ? `${e.icon} ` : ''}${e.title}`).setIcon('file-text')
 				.onClick(() => void this.app.workspace.openLinkText(e.path, surface.sourcePath, false)));
+		}
+		// a deadline inside an event is the same note: one edit for it
+		const editable = [...new Map(on.map((e) => [e.path, e])).values()];
+		for (const e of editable) {
+			const title = e.milestone ? (this.integrations.storedEvent(e.path)?.title ?? e.title) : e.title;
+			menu.addItem((i) => i.setTitle(`Edit ${e.icon && !e.milestone ? `${e.icon} ` : ''}${title}`).setIcon('pencil')
+				.onClick(() => this.editEvent(e.path)));
 		}
 		if (evt) menu.showAtMouseEvent(evt);
 		else menu.showAtPosition({ x: 0, y: 0 });
@@ -195,6 +220,14 @@ export default class YearMapPlugin extends Plugin {
 			openMonth: (month, evt) => void this.integrations.openPeriod('month', `${year}-${pad2(month + 1)}-01`, Keymap.isModEvent(evt)),
 			openYear: (evt) => void this.integrations.openPeriod('year', `${year}-01-01`, Keymap.isModEvent(evt)),
 			openNote: (path, evt) => void app.workspace.openLinkText(path, surface.sourcePath, Keymap.isModEvent(evt)),
+			clickEvent: (path, evt) => {
+				// a modified click opens the note where it asks to, whatever a click does
+				const mod = evt ? Keymap.isModEvent(evt) : false;
+				if (mod || this.settings.eventClick === 'note') void app.workspace.openLinkText(path, surface.sourcePath, mod);
+				else if (this.settings.eventClick === 'edit') this.editEvent(path);
+				else this.eventMenu(path, evt?.type === 'click' ? evt as MouseEvent : undefined, surface);
+			},
+			eventMenu: (path, evt) => this.eventMenu(path, evt, surface),
 			planRange: (start, end) => this.planEvent(start, end, 'never', monthNames),
 			reschedule: (path, _from, kind, to) => void this.integrations.reschedule(path, kind, to),
 			prevYear: () => surface.setYear(surface.year - 1),

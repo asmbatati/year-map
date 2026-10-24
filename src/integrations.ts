@@ -8,7 +8,7 @@
  * Events planned on the grid are written here, as notes with a start and an end.
  */
 import { Notice, TFile, moment, normalizePath, type App, type PaneType } from 'obsidian';
-import { dailyNotes, journalDays, moveDate, taskSettingsFrom, type NoteFacts } from './sources.ts';
+import { dailyNotes, journalDays, moveDate, storedEvent, taskSettingsFrom, type NoteFacts, type StoredEvent } from './sources.ts';
 import type { EventDraft } from './modal.ts';
 import type { YearMapSettings } from './settings-model.ts';
 
@@ -240,6 +240,55 @@ export class Integrations {
 		const body = fill(e.body).replace(/\r\n/g, '\n');
 		await this.app.vault.create(path, lines.join('\n') + body + (body && !body.endsWith('\n') ? '\n' : ''));
 		return path;
+	}
+
+	/** An event note as its window shows it. */
+	storedEvent(path: string): StoredEvent | null {
+		const file = this.app.vault.getAbstractFileByPath(path);
+		if (!(file instanceof TFile)) return null;
+		return storedEvent(this.app.metadataCache.getFileCache(file)?.frontmatter, file.basename, this.settings().events);
+	}
+
+	/** Write back what the event window changed, and only that: a date stays under the key it was found under, an open
+	 * end stays open unless a new end was given, and a field emptied is removed. A note still named after its old title
+	 * is renamed after the new one, its links updated by Obsidian. Returns the note's path. */
+	async updateEvent(path: string, before: StoredEvent, d: EventDraft): Promise<string> {
+		const file = this.app.vault.getAbstractFileByPath(path);
+		if (!(file instanceof TFile)) return path;
+		const e = this.settings().events;
+		await this.app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => {
+			const set = (key: string, v: string | undefined): void => {
+				if (v) fm[key] = v;
+				else delete fm[key];
+			};
+			if (d.title !== before.title) fm[e.titleKey || 'title'] = d.title;
+			if (d.start && d.start !== before.start) {
+				const key = before.startKey ?? e.startKeys[0] ?? 'start';
+				fm[key] = moveDate(fm[key], d.start);
+			}
+			if (d.end !== before.end) {
+				const key = before.endKey ?? e.endKeys[0] ?? 'end';
+				set(key, d.end && d.end !== d.start ? moveDate(fm[key], d.end) : undefined);
+			}
+			if (d.category !== before.category) set(e.categoryKey || 'category', d.category);
+			if (d.icon !== before.icon) set(e.iconKey || 'icon', d.icon);
+			if (d.color !== before.color) set(e.colorKey || 'color', d.color);
+			const repeat = d.repeat ?? 'never';
+			if (repeat !== before.repeat) {
+				set(e.repeatKey || 'repeat', repeat === 'never' ? undefined : 'yearly');
+				if (repeat === 'hijri') fm[e.calendarKey || 'calendar'] = 'hijri';
+				else if (before.repeat === 'hijri') delete fm[e.calendarKey || 'calendar'];
+			}
+		});
+		if (d.title === before.title || file.basename !== safeFileName(before.title)) return file.path;
+		const base = safeFileName(d.title) || 'Event';
+		const folder = file.path.includes('/') ? file.path.slice(0, file.path.lastIndexOf('/')) : '';
+		const at = (name: string): string => normalizePath(folder ? `${folder}/${name}.md` : `${name}.md`);
+		let to = at(base);
+		for (let n = 2; to !== file.path && this.app.vault.getAbstractFileByPath(to); n++) to = at(`${base} ${n}`);
+		if (to === file.path) return to;
+		await this.app.fileManager.renameFile(file, to);
+		return to;
 	}
 }
 

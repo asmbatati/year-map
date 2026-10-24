@@ -444,3 +444,74 @@ test('the settings carry the click, the legend, the quarters and the kinds, whic
 	assert.deepEqual(plugin.settings.events.milestoneKeys, ['deadline', 'notification']);
 	assert.equal(tab.getControlValue('dayClick'), 'menu');
 });
+
+/* 1.2: an event on the map can be changed where it is drawn. */
+const bar = (el: FakeEl, path: string): FakeEl => {
+	const b = el.all('ym-bar').find((x) => x.attrs.get('data-path') === path);
+	assert.ok(b, path);
+	return b;
+};
+
+test('a right-click on an event asks: open its note, or edit it; the edit writes what changed and renames the note', async () => {
+	const { app, block } = await setup();
+	const el = block('year: 2026');
+	const e = bar(el, 'Year Map/Lisbon.md').fire('contextmenu');
+	assert.ok(e.defaultPrevented, 'the browser\'s own menu is not shown');
+	const menu = menus.at(-1);
+	assert.deepEqual(menu?.items.map((i) => i.title), ['Open the note', 'Edit the event']);
+	menu?.items[1]?.click();
+	await wait(10);
+	const win = modals.at(-1) as EventWindow | undefined;
+	assert.ok(win, 'the event window, filled in');
+	const path = await win.submit('Lisbon trip', undefined, { end: '2026-08-05', category: 'Trip', repeat: 'yearly' });
+	assert.equal(path, 'Year Map/Lisbon trip.md');
+	assert.equal(app.files.has('Year Map/Lisbon.md'), false);
+	assert.deepEqual(app.fms.get('Year Map/Lisbon trip.md'), {
+		start: '2026-07-30', end: '2026-08-05', color: '#1c7ed6', title: 'Lisbon trip', category: 'Trip', repeat: 'yearly',
+	});
+	menu?.items[0]?.click();
+	await wait(10);
+	assert.deepEqual(app.opened.at(-1), { target: 'Year Map/Lisbon.md', newLeaf: false });
+});
+
+test('an edit clears what was emptied and leaves an open end, a name and keys it was not asked to change', async () => {
+	const { app, block } = await setup();
+	app.change({ path: 'Year Map/Course.md', fm: { title: 'A course', date: '2026-09-01', end: 'today', icon: '📚', repeat: 'yearly', calendar: 'hijri' } });
+	await wait(400);
+	const el = block('year: 2026');
+	bar(el, 'Year Map/Course.md').fire('contextmenu');
+	menus.at(-1)?.items[1]?.click();
+	await wait(10);
+	const win = modals.at(-1) as EventWindow | undefined;
+	assert.ok(win);
+	const path = await win.submit('A course', '#2f9e44', { icon: undefined, repeat: 'never' });
+	assert.equal(path, 'Year Map/Course.md', 'its name was not changed, so neither is its file');
+	assert.deepEqual(app.fms.get('Year Map/Course.md'), { title: 'A course', date: '2026-09-01', end: 'today', color: '#2f9e44' });
+});
+
+test('a click on an event opens its note, or the edit, as the settings say; a day\'s menu offers the edit too', async () => {
+	const plain = await setup();
+	const el = plain.block('year: 2026');
+	const m0 = modals.length;
+	bar(el, 'Year Map/Lisbon.md').fire('click');
+	await wait(10);
+	assert.deepEqual(plain.app.opened.at(-1), { target: 'Year Map/Lisbon.md', newLeaf: false });
+	assert.equal(modals.length, m0, 'no window');
+	day(el, '2026-07-31').fire('contextmenu');
+	assert.ok(menus.at(-1)?.items.some((i) => i.title === 'Edit Lisbon'), 'the day\'s menu names the edit');
+
+	const edit = await setup({ saved: { eventClick: 'edit' } });
+	const el2 = edit.block('year: 2026');
+	bar(el2, 'Year Map/Lisbon.md').fire('click');
+	await wait(10);
+	assert.equal(modals.length, m0 + 1, 'the edit, at once');
+	bar(el2, 'Year Map/Lisbon.md').fire('click', { ctrlKey: true });
+	await wait(10);
+	assert.deepEqual(edit.app.opened.at(-1), { target: 'Year Map/Lisbon.md', newLeaf: 'tab' }, 'a modified click opens the note');
+
+	const ask = await setup({ saved: { eventClick: 'menu' } });
+	const el3 = ask.block('year: 2026');
+	bar(el3, 'Year Map/Lisbon.md').fire('click');
+	assert.deepEqual(menus.at(-1)?.items.map((i) => i.title), ['Open the note', 'Edit the event']);
+	assert.equal(ask.plugin.settingTabs[0]?.getControlValue('eventClick'), 'menu');
+});

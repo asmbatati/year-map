@@ -371,6 +371,16 @@ export class FakeApp {
 				this.fms.set(f.path, fm);
 				return Promise.resolve();
 			},
+			renameFile: (f: TFile, to: string) => {
+				if (this.files.has(to)) return Promise.reject(new Error('Destination file already exists!'));
+				const from = f.path;
+				const moved = this.put({ path: to, fm: this.fms.get(from), text: this.texts.get(from) });
+				this.files.delete(from);
+				this.fms.delete(from);
+				this.texts.delete(from);
+				vault.trigger('rename', moved, from);
+				return Promise.resolve();
+			},
 		};
 		this.plugins = { plugins: {}, getPlugin: (id: string) => this.plugins.plugins[id] ?? null };
 		this.internalPlugins = { getPluginById: (id: string) => this.internal[id] ?? null };

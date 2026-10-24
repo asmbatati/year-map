@@ -101,7 +101,7 @@ const noop = (): void => {};
 const target = document.getElementById('year');
 if (target) {
 	renderYear(target, model, {
-		openDay: noop, clickDay: noop, dayMenu: noop, openMonth: noop, openYear: noop, openNote: noop, planRange: noop, reschedule: noop,
+		openDay: noop, clickDay: noop, dayMenu: noop, openMonth: noop, openYear: noop, openNote: noop, clickEvent: noop, eventMenu: noop, planRange: noop, reschedule: noop,
 		prevYear: noop, nextYear: noop, thisYear: noop,
 	});
 }
