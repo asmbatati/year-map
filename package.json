@@ -1,13 +1,13 @@
 {
 	"name": "year-map",
 	"version": "1.2.0",
-	"description": "A linear calendar: the whole year on one page, with your daily notes, your tasks and your plans on it.",
+	"description": "The whole year on one page, as a linear calendar: your daily notes, TaskNotes tasks you can drag to reschedule, and holidays that return on their Hijri dates.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"test": "node --test test/grid.test.ts test/layout.test.ts test/options.test.ts test/sources.test.ts test/events.test.ts test/render.test.ts test/render11.test.ts test/plugin.test.ts",
+		"test": "node --test test/grid.test.ts test/layout.test.ts test/options.test.ts test/sources.test.ts test/events.test.ts test/render.test.ts test/render11.test.ts test/plugin.test.ts test/hijri13.test.ts test/nohijri.test.ts",
 		"lint": "eslint .",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},

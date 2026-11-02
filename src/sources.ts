@@ -12,7 +12,7 @@ import {
 	type YearMapSettings,
 } from './settings-model.ts';
 import type { Span } from './layout.ts';
-import { hijriOccurrences, isHijri, isYearly, yearlyOccurrences } from './recur.ts';
+import { hijriAvailable, isHijri, isYearly, occurrencesIn } from './recur.ts';
 
 export interface NoteFacts {
 	path: string;
@@ -177,6 +177,8 @@ export interface EventItem extends Span {
 	category: string;
 	/** For a date inside an event (a deadline), the property it came from. */
 	milestone?: string;
+	/** An event that repeats on a calendar the platform does not have, drawn on its note's own days only. */
+	noCalendar?: boolean;
 }
 
 /** What the year is drawn for: repeats are worked out for this year, and an open end runs until today. */
@@ -230,13 +232,15 @@ export function eventsFrom(notes: readonly NoteFacts[], es: EventOptions, ctx: E
 			if (open && ctx.today) end = ctx.today > start ? ctx.today : start;
 			if (end < start) end = start;
 			const repeats = isYearly(fm[es.repeatKey]) && ctx.year !== undefined;
+			const hijri = isHijri(fm[es.calendarKey]);
 			if (!repeats) {
 				out.push({ ...base, id: n.path, start, end });
+			} else if (hijri && !hijriAvailable()) {
+				out.push({ ...base, id: n.path, start, end, noCalendar: true });
 			} else {
 				const year = ctx.year ?? Number(start.slice(0, 4));
-				const occurrences = isHijri(fm[es.calendarKey])
-					? hijriOccurrences(start, end, year)
-					: yearlyOccurrences(start, end, year);
+				const observed = [fm[es.observedKey]].flat().map(dateOf).filter((d): d is string => d !== null);
+				const occurrences = occurrencesIn(start, end, year, { hijri, offset: es.hijriOffset, observed });
 				for (const o of occurrences) out.push({ ...base, id: `${n.path}@${o.start}`, start: o.start, end: o.end });
 			}
 		}

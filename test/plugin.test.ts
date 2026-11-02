@@ -141,7 +141,7 @@ test('loading registers the block, the view, the ribbon icon, the commands and t
 test('a block draws this year with TaskNotes\' tasks, through its own field names and colours, and the journal\'s days', async () => {
 	const { block } = await setup();
 	const el = block('year: 2026');
-	assert.equal(el.all('ym-title')[0]?.text, '2026 Linear Calendar');
+	assert.equal(el.all('ym-title')[0]?.text, '2026');
 	const chips = day(el, '2026-10-05').all('ym-task');
 	assert.deepEqual(chips.map((c) => c.attrs.get('data-path')), ['Tasks/Submit the paper.md'], 'the archived one is left out');
 	assert.equal(chips[0]?.css.get('--ym-color'), '#123456', 'the status colour TaskNotes gives it');
@@ -259,9 +259,9 @@ test('the view opens from its command, and its buttons move through the years', 
 	const leaf = app.leaves[0];
 	assert.ok(leaf?.view, 'a leaf shows the view');
 	const view = leaf.view as { contentEl: FakeEl; getState(): { year: number } };
-	assert.equal(view.contentEl.all('ym-title')[0]?.text, '2026 Linear Calendar');
+	assert.equal(view.contentEl.all('ym-title')[0]?.text, '2026');
 	view.contentEl.all('ym-next')[0]?.fire('click');
-	assert.equal(view.contentEl.all('ym-title')[0]?.text, '2027 Linear Calendar');
+	assert.equal(view.contentEl.all('ym-title')[0]?.text, '2027');
 	assert.equal(view.getState().year, 2027, 'the year is kept with the workspace');
 	view.contentEl.all('ym-today')[0]?.fire('click');
 	assert.equal(view.getState().year, 2026);
@@ -298,7 +298,7 @@ test('the settings tab defines every setting, and each row draws', async () => {
 	walk(tab.getSettingDefinitions());
 	const names = flat.map((d) => d.name ?? d.heading);
 	for (const name of ['Block name', 'Week starts on', 'Weekend', 'Title', 'Daily notes', 'Daily notes from', 'Tasks', 'Date a task sits on',
-		'Drag to reschedule', 'Events', 'Event folders', 'Folder for new events', 'Properties for new events', 'Text of a new event']) {
+		'Drag to reschedule', 'Events', 'Event folders', 'Hijri offset', 'Observed property', 'Folder for new events', 'Properties for new events', 'Text of a new event']) {
 		assert.ok(names.includes(name), name);
 	}
 	const before = settingNames.length;
@@ -329,6 +329,11 @@ test('a change in the settings is saved, read back, and drawn', async () => {
 	assert.equal(plugin.settings.blockName, 'year-map', 'a block keeps a name');
 	await tab.setControlValue('events.extraProperties', 'up: "[[Plans]]"\n');
 	assert.equal(plugin.settings.events.extraProperties, 'up: "[[Plans]]"', 'kept as written, without the trailing line');
+	await tab.setControlValue('events.hijriOffset', '-1');
+	assert.equal(plugin.settings.events.hijriOffset, -1);
+	assert.equal(tab.getControlValue('events.hijriOffset'), '-1', 'as the dropdown spells it');
+	await tab.setControlValue('events.hijriOffset', '7');
+	assert.equal(plugin.settings.events.hijriOffset, 2, 'at most two days');
 	await tab.setControlValue('maxChips', 0);
 	assert.equal(plugin.settings.maxChips, 1, 'at least one');
 	assert.deepEqual((plugin.data as { weekendDays: number[] }).weekendDays, [5, 6], 'saved');

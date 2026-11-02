@@ -98,6 +98,7 @@ export function renderYear(container: HTMLElement, m: YearModel, h: Handlers): v
 	today.addEventListener('click', () => h.thisYear());
 	next.addEventListener('click', () => h.nextYear());
 	if (m.tagline) head.createDiv({ cls: 'ym-tagline', text: m.tagline });
+	if (m.notice) root.createDiv({ cls: 'ym-notice', text: m.notice, attr: { role: 'status' } });
 	if (m.legend.length) {
 		const legend = root.createDiv({ cls: 'ym-legend' });
 		for (const k of m.legend) {

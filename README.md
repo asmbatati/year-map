@@ -1,8 +1,9 @@
 # Year Map
 
-A linear calendar for Obsidian: the whole year on one page, twelve months as twelve rows with the days lined up by
-weekday, so that every weekend falls in the same column down the year. Your daily notes, your tasks and your plans
-are drawn on it, and every day, month, task and plan opens with a click.
+The whole year on one page, as a linear calendar: your daily notes,
+[TaskNotes](https://github.com/callumalpass/tasknotes) tasks you can drag to reschedule, and holidays that return on
+their Hijri dates. Twelve months are twelve rows with the days lined up by weekday, so that every weekend falls in
+the same column down the year, and every day, month, task and plan opens with a click.
 
 The layout follows **The Linear Calendar** by Nick Milo (see [Credit](#credit)).
 
@@ -24,7 +25,10 @@ The layout follows **The Linear Calendar** by Nick Milo (see [Credit](#credit)).
   legend, then Conference, Holiday, Birthday, Trip, Money and Sale. Change them or add your own. A legend under the
   title names the kinds the year shows.
 - **Repeats.** An event that says `repeat: yearly` comes back every year from its first. With `calendar: hijri` it
-  follows the Umm al-Qura calendar, so Ramadan and the two Eids land on their days each year.
+  follows the Umm al-Qura calendar, the Hijri calendar of Saudi Arabia: Ramadan, the two Eids and Arafah come back
+  on their Hijri dates. Umm al-Qura is computed, while Ramadan and the Eids begin when they are announced, which can
+  be a day or two off it: a setting moves every day it computes, and a note can name the day a year's occurrence was
+  actually observed.
 - **Deadlines.** A date inside an event, such as a conference's `deadline`, is drawn as a day of its own, in the
   Deadline kind, in the year it falls in.
 - **Still open.** An event whose end is `today` runs until today: a request still waiting, a project under way.
@@ -110,6 +114,7 @@ category: Holiday        # its colour and icon, unless the note gives its own
 icon: 🌙                 # an emoji or a few letters
 repeat: yearly           # every year from 2026
 calendar: hijri          # on the Umm al-Qura calendar
+observed: [2027-02-09]   # if a year's Ramadan begins on another day than the one computed
 ---
 ```
 
@@ -124,14 +129,33 @@ deadline: 2026-09-16     # drawn on 16 September 2026, in the Deadline kind
 ```
 
 The Hijri dates come from your system's own calendar data (`Intl`, Umm al-Qura). Where a month's last day is the
-30th and next year's month has 29 days, the event ends on the 29th.
+30th and next year's month has 29 days, the event ends on the 29th. The **Hijri offset** setting moves every day
+Umm al-Qura computes, by up to two days either way; the days a note gives stay as written. A date under `observed`
+takes the place of the occurrence nearest to it (within 30 days) and keeps its length, so the list can hold a date
+for each year that differed. Where your system has no Umm al-Qura calendar, an event that repeats by it is drawn only
+on the days its note gives, and a line above the grid says so.
+
+## Why not Linear Calendar, Yearly Glance, or TaskNotes' Year view
+
+Each does its own job well; which to choose depends on what you keep in your vault.
+
+- **Linear Calendar** draws all 365 days from your notes' date properties, lets you drag across days to make a
+  multi-day note, and repeats notes. Year Map draws the same kind of year and adds TaskNotes' tasks, which you drag
+  to another day, days that open through Journals, and repeats on the Hijri calendar. Without TaskNotes, Journals
+  or Hijri dates, Linear Calendar may be all you need.
+- **Yearly Glance** keeps annual events and birthdays in view, with the Chinese lunar calendar built in and an
+  interface in English and Chinese. Year Map does for the Hijri calendar what Yearly Glance does for the Chinese
+  one, and puts your tasks and daily notes on the same page; its own interface is in English only.
+- **TaskNotes' Year view** shows your tasks across the year as twelve month grids. Year Map lays the year out as
+  twelve rows lined up by weekday, draws your plans and events as bars beside the tasks, and moves a task you drag
+  through TaskNotes' own update, so your tasks stay TaskNotes'.
 
 ## Settings
 
 | Setting | Default | What it does |
 |---|---|---|
 | Block name | `year-map` | The code block's language. A change takes effect when the plugin is reloaded. |
-| Title, Line under the title | `{year} Linear Calendar`, `Life is bigger than a week.` | The head of the page. |
+| Title, Line under the title | `{year}`, none | The head of the page; `{year}` stands for the year. |
 | Week starts on | Sunday | The first column. |
 | Weekend | Saturday and Sunday | The columns shaded down the year; Friday and Saturday, or one day, or none. |
 | Density | Comfortable | Compact draws tasks as dots. |
@@ -156,6 +180,8 @@ The Hijri dates come from your system's own calendar data (`Intl`, Umm al-Qura).
 | Default colour | orange | For an event with none. |
 | Kinds of event | ten kinds | One per line: `Name, #colour, icon`. |
 | Kind, Icon, Repeat and Calendar properties | `category`, `icon`, `repeat`, `calendar` | |
+| Hijri offset | As Umm al-Qura computes | Moves every day the Hijri calendar computes, up to two days earlier or later. |
+| Observed property | `observed` | Dates a repeating event was observed on instead of the days computed. |
 | Dates inside an event, and their kind | `deadline`; Deadline | Each drawn as a day of its own. |
 | Folder for new events | `Year Map` | Where a plan made on the grid is written. |
 | Properties for new events, Text of a new event | none | Frontmatter lines and a body for every new plan, such as a parent note or a heading. `{{title}}`, `{{start}}`, `{{end}}` and `{{now:FORMAT}}` are filled in. |

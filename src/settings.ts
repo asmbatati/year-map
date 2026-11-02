@@ -24,6 +24,14 @@ const WEEKENDS: Record<string, string> = {
 	'': 'None',
 };
 
+const HIJRI_OFFSETS: Record<string, string> = {
+	'-2': 'Two days earlier',
+	'-1': 'A day earlier',
+	'0': 'As Umm al-Qura computes',
+	'1': 'A day later',
+	'2': 'Two days later',
+};
+
 /** Settings kept as lists and edited as text: folders one per line, the rest separated by commas. */
 const LISTS: Record<string, string> = {
 	'events.folders': '\n',
@@ -62,6 +70,7 @@ export class YearMapSettingTab extends PluginSettingTab {
 		if (key === 'weekendDays') return [...this.s.weekendDays].sort((a, b) => a - b).join(',');
 		if (key === 'weekStart') return String(this.s.weekStart);
 		if (key === 'events.categories') return formatCategories(this.s.events.categories);
+		if (key === 'events.hijriOffset') return String(this.s.events.hijriOffset);
 		const [at, last] = this.slot(key);
 		const value = at[last];
 		const sep = LISTS[key];
@@ -76,6 +85,9 @@ export class YearMapSettingTab extends PluginSettingTab {
 		} else if (key === 'weekStart') {
 			const n = Number(value);
 			this.s.weekStart = (Number.isInteger(n) && n >= 0 && n <= 6 ? n : 0) as YearMapSettings['weekStart'];
+		} else if (key === 'events.hijriOffset') {
+			const n = Math.round(Number(value)) || 0;
+			this.s.events.hijriOffset = Math.max(-2, Math.min(2, n));
 		} else if (key === 'events.body') {
 			this.s.events.body = String(value).replace(/\r\n/g, '\n');
 		} else if (key === 'events.categories') {
@@ -240,6 +252,16 @@ export class YearMapSettingTab extends PluginSettingTab {
 						name: 'Calendar property',
 						desc: 'With "hijri", a yearly event follows the Umm al-Qura calendar, as Ramadan and the Eids do.',
 						control: { type: 'text', key: 'events.calendarKey' },
+					},
+					{
+						name: 'Hijri offset',
+						desc: 'Umm al-Qura is computed, and the announced day can differ from it. Moves every day it computes; the days a note gives stay as written.',
+						control: { type: 'dropdown', key: 'events.hijriOffset', options: HIJRI_OFFSETS },
+					},
+					{
+						name: 'Observed property',
+						desc: 'Dates a repeating event was observed on instead, such as an Eid announced a day later. Each takes the place of that year\'s days, keeping their length.',
+						control: { type: 'text', key: 'events.observedKey' },
 					},
 					{
 						name: 'Dates inside an event',

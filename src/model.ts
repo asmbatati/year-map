@@ -47,7 +47,11 @@ export interface YearModel {
 	/** The tint of each quarter, or null when the quarters are not tinted. */
 	quarterTints: string[] | null;
 	dayClick: DayClick;
+	/** A line saying what the map cannot draw here, such as Hijri repeats on a platform without Umm al-Qura; '' for none. */
+	notice: string;
 }
+
+export const NO_HIJRI_NOTICE = 'This device has no Umm al-Qura calendar, so events that repeat on the Hijri calendar are drawn only on the days their notes give.';
 
 export function buildModel(i: ModelInput): YearModel {
 	const s = i.settings;
@@ -96,6 +100,8 @@ export function buildModel(i: ModelInput): YearModel {
 		legend,
 		quarterTints,
 		dayClick: s.dayClick,
+		// any year: a Hijri event written last year is missing from this one
+		notice: events.some((e) => e.noCalendar) ? NO_HIJRI_NOTICE : '',
 	};
 }
 
@@ -117,6 +123,6 @@ export function signatureOf(m: YearModel): string {
 			s.startCol, s.endCol, s.lane, s.startsHere, s.endsHere])),
 		[...m.layout.hidden.entries()],
 		[...m.daily.keys()].sort(),
-		m.legend, m.quarterTints, m.dayClick,
+		m.legend, m.quarterTints, m.dayClick, m.notice,
 	]);
 }

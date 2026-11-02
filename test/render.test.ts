@@ -66,7 +66,7 @@ const draw = (m: YearModel): { root: FakeEl; log: unknown[][] } => {
 
 test('the model: tasks by day, the year\'s title, today', () => {
 	const m = model();
-	assert.equal(m.title, '2026 Linear Calendar');
+	assert.equal(m.title, '2026');
 	assert.equal(m.tasksByDay.get('2026-10-05')?.length, 4);
 	assert.equal(m.today, '2026-10-01');
 	assert.equal(m.layout.rows[6]?.[0]?.item.title, 'Lisbon');

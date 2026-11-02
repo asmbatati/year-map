@@ -381,6 +381,18 @@
 }
 
 /* the legend: the kinds of event the year shows, under the title */
+/* what the map cannot draw here, such as Hijri repeats on a device without Umm al-Qura */
+.ym-notice {
+	margin: -0.5em var(--ym-label-w) 1.1em;
+	min-width: 760px;
+	padding: 0.35em 0.8em;
+	border-left: 3px solid var(--ym-accent);
+	background: var(--ym-accent-soft);
+	color: var(--ym-ink);
+	font-size: 0.8em;
+	line-height: 1.5;
+}
+
 .ym-legend {
 	display: flex;
 	flex-wrap: wrap;

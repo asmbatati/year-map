@@ -1,8 +1,10 @@
 /*
  * Events that come back: every year on the same day, or every year on the same day of the Umm al-Qura calendar (the
- * Hijri calendar of Saudi Arabia), so Ramadan and the two Eids land on their days each Gregorian year. The Hijri dates
- * come from the platform's own Intl (`islamic-umalqura`), in Obsidian as in Node; where it has no such calendar, an
- * event that repeats by it is drawn once, on the dates it gives. Pure apart from Intl.
+ * Hijri calendar of Saudi Arabia). Umm al-Qura is computed, and Ramadan and the two Eids begin where they are announced,
+ * which can be a day or two off it: an offset moves every day it computes, and a date a year's occurrence was observed
+ * on takes that occurrence's place. The days a note gives are drawn as written. The Hijri dates come from the
+ * platform's own Intl (`islamic-umalqura`), in Obsidian as in Node; where it has no such calendar, an event that
+ * repeats by it is drawn once, on the days its note gives, and the map says why. Pure apart from Intl.
  */
 import { addDays, daysBetween, daysInMonth, isoOf } from './grid.ts';
 
@@ -59,6 +61,11 @@ function hijriFormat(): Intl.DateTimeFormat | null {
 		formatter = null;
 	}
 	return formatter;
+}
+
+/** The platform has the Umm al-Qura calendar. */
+export function hijriAvailable(): boolean {
+	return hijriFormat() !== null;
 }
 
 /** A Gregorian date on the Umm al-Qura calendar, or null where the platform does not have it. */
@@ -130,4 +137,36 @@ export function hijriOccurrences(start: string, end: string, year: number): Occu
 		out.push({ start: s, end: e < s ? s : e });
 	}
 	return out;
+}
+
+export interface RepeatOptions {
+	/** On the Umm al-Qura calendar; otherwise the Gregorian. */
+	hijri: boolean;
+	/** Days added to every day Umm al-Qura computes, at most two either way. */
+	offset?: number;
+	/** Dates a year's occurrence was observed on, each taking the place of the occurrence it is nearest. */
+	observed?: readonly string[];
+}
+
+// how far an observed date may be from the occurrence it moves
+const OBSERVED_WITHIN = 30;
+
+/** The days an event that comes back is drawn on in `year`. Worked out for the years either side too, so that a day
+ * moved across the turn of the year lands in the year it is moved to. */
+export function occurrencesIn(start: string, end: string, year: number, o: RepeatOptions): Occurrence[] {
+	const of = (y: number): Occurrence[] => (o.hijri ? hijriOccurrences(start, end, y) : yearlyOccurrences(start, end, y));
+	const byStart = new Map<string, Occurrence>();
+	for (const y of [year - 1, year, year + 1]) for (const x of of(y)) byStart.set(x.start, x);
+	const offset = o.hijri ? Math.max(-2, Math.min(2, Math.trunc(o.offset ?? 0) || 0)) : 0;
+	// the occurrence that starts on the note's own day is the note's, drawn as written
+	let all = [...byStart.values()]
+		.map((x) => (offset && x.start !== start ? { start: addDays(x.start, offset), end: addDays(x.end, offset) } : x));
+	for (const day of o.observed ?? []) {
+		const gap = (x: Occurrence): number => Math.abs(daysBetween(x.start, day));
+		const near = all.filter((x) => gap(x) <= OBSERVED_WITHIN).sort((a, b) => gap(a) - gap(b))[0];
+		if (near) all = all.map((x) => (x === near ? { start: day, end: addDays(day, daysBetween(x.start, x.end)) } : x));
+	}
+	const first = isoOf(year, 0, 1);
+	const last = isoOf(year, 11, 31);
+	return all.filter((x) => x.end >= first && x.start <= last).sort((a, b) => (a.start < b.start ? -1 : 1));
 }

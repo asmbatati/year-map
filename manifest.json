@@ -3,7 +3,7 @@
 	"name": "Year Map",
 	"version": "1.2.0",
 	"minAppVersion": "1.13.0",
-	"description": "A linear calendar: the whole year on one page, with your daily notes, your tasks and your plans on it.",
+	"description": "The whole year on one page, as a linear calendar: your daily notes, TaskNotes tasks you can drag to reschedule, and holidays that return on their Hijri dates.",
 	"author": "Abdulrahman S. Al-Batati",
 	"authorUrl": "https://github.com/asmbatati",
 	"isDesktopOnly": false

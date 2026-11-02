@@ -60,6 +60,10 @@ export interface EventOptions {
 	 * `hijri`, every year of the Umm al-Qura calendar. */
 	repeatKey: string;
 	calendarKey: string;
+	/** Days added to every day the Umm al-Qura calendar computes, -2 to 2: where the announced day differs from it. */
+	hijriOffset: number;
+	/** Dates a repeating event was observed on instead, each taking the place of that year's occurrence. */
+	observedKey: string;
 	/** Dates inside an event, such as a conference's deadline, each drawn as a day of its own in the kind below. */
 	milestoneKeys: string[];
 	milestoneCategory: string;
@@ -123,8 +127,8 @@ export const DEFAULT_SETTINGS: YearMapSettings = {
 	blockName: 'year-map',
 	weekStart: 0,
 	weekendDays: [0, 6],
-	title: '{year} Linear Calendar',
-	tagline: 'Life is bigger than a week.',
+	title: '{year}',
+	tagline: '',
 	density: 'comfortable',
 	maxLanes: 3,
 	maxChips: 3,
@@ -170,6 +174,8 @@ export const DEFAULT_SETTINGS: YearMapSettings = {
 		iconKey: 'icon',
 		repeatKey: 'repeat',
 		calendarKey: 'calendar',
+		hijriOffset: 0,
+		observedKey: 'observed',
 		milestoneKeys: ['deadline'],
 		milestoneCategory: 'Deadline',
 		newFolder: 'Year Map',
