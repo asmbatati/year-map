@@ -69,10 +69,11 @@ const notes: NoteFacts[] = [
 	task('Quarterly review', { status: 'to-do', scheduled: '2026-12-31' }),
 	task('Lab safety course', { status: 'done', due: '2026-03-04' }),
 	task('Grant report', { status: 'to-do', due: '2026-11-12' }),
-	// Ramadan and the Eid repeat on the Hijri calendar, the birthday every year, the conference carries its deadline
+	// Ramadan and the two Eids repeat on the Hijri calendar, the birthday every year, the conference carries its deadline
 	event('Ramadan', '2026-02-18', '2026-03-19', 'Holiday', { repeat: 'yearly', calendar: 'hijri' }),
 	event('Eid al-Fitr', '2026-03-20', '2026-03-22', 'Holiday', { repeat: 'yearly', calendar: 'hijri', icon: '🎉' }),
 	event('Family trip', '2026-03-23', '2026-03-28', 'Trip'),
+	event('Eid al-Adha', '2026-05-27', '2026-05-30', 'Holiday', { repeat: 'yearly', calendar: 'hijri', icon: '🐑' }),
 	event('Conference', '2026-06-01', '2026-06-05', 'Conference', { deadline: '2026-01-15' }),
 	event('Summer school', '2026-07-12', '2026-07-24', 'Education'),
 	event('Writing retreat', '2026-07-20', '2026-08-06', 'Work'),

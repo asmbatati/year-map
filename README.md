@@ -210,6 +210,13 @@ licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). This p
 CSS and adds days, tasks and events to it; no file of the original is included. Every year map carries the credit in
 its corner.
 
+## More from this author
+
+- **[Note Relatives](https://github.com/asmbatati/note-relatives)**: a note's parent, siblings, children,
+  translation counterpart and prerequisites as links, read from its frontmatter.
+- **[Engineering 3D Viewer](https://github.com/asmbatati/engineering-3d-viewer)**: parts, scans and robots in your
+  notes, from meshes and point clouds to URDF robots and STEP, IGES and BREP parts.
+
 ## License
 
 [MIT](LICENSE) © 2026 Abdulrahman S. Al-Batati
